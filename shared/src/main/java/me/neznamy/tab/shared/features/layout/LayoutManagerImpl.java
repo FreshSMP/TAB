@@ -162,6 +162,8 @@ public class LayoutManagerImpl extends RefreshableFeature implements LayoutManag
     }
 
     public void updateTeamName(@NotNull TabPlayer p, @NotNull String teamName) {
+        // onQuit already dropped the player; a rename arriving after it would add them back for good
+        if (!p.isOnline()) return;
         sortedPlayers.remove(p);
         p.layoutData.sortingString = teamName;
         sortedPlayers.put(p, teamName);

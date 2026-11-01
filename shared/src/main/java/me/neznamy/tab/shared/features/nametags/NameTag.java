@@ -259,6 +259,8 @@ public class NameTag extends TabFeature implements NameTagManager, JoinListener,
     }
 
     private boolean shouldRegister(@NotNull TabPlayer teamOwner, @NonNull TabPlayer viewer) {
+        // Quit already took the team off every viewer; a late vanish or condition update must not put it back
+        if (!teamOwner.isOnline()) return false;
         if (teamOwner.teamData.isDisabled()) return false;
         if (teamOwner.teamData.vanishedFor.contains(viewer.getUniqueId())) return false;
         if (!viewer.canSee(teamOwner) && teamOwner != viewer) return false;
@@ -277,6 +279,10 @@ public class NameTag extends TabFeature implements NameTagManager, JoinListener,
         customThread.execute(new TimedCaughtTask(TAB.getInstance().getCpu(), () -> {
             // Function ran before onJoin did (super rare), drop action since onJoin will use new team name anyway
             if (player.teamData.teamName == null) return;
+            // A rename queued for a player who left in the meantime would register their team again on every
+            // viewer with nothing ever removing it, keeping the player object and every team on its own
+            // scoreboard alive for as long as any of those viewers stays online
+            if (!player.isOnline()) return;
             for (TabPlayer viewer : onlinePlayers.getPlayers()) {
                 viewer.teamData.unregisterTeam(player);
             }
