@@ -15,6 +15,12 @@ repositories {
     }
 }
 
+paperweight {
+    javaLauncher = javaToolchains.launcherFor {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 val version = "1.21.4-R0.1-SNAPSHOT"
 
 dependencies {
