@@ -27,6 +27,7 @@ import me.neznamy.tab.shared.features.sorting.SortingPlayerData;
 import me.neznamy.tab.shared.features.types.RefreshableFeature;
 import me.neznamy.tab.shared.hook.FloodgateHook;
 import me.neznamy.tab.shared.placeholders.expansion.ExpansionData;
+import me.neznamy.tab.shared.platform.decorators.SafeScoreboard;
 import net.luckperms.api.model.user.User;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -332,6 +333,17 @@ public abstract class TabPlayer implements me.neznamy.tab.api.TabPlayer {
      */
     public void markOffline() {
         online = false;
+    }
+
+    /**
+     * Drops the memory held for the player after their quit was processed: the scoreboard contents and the
+     * cached placeholder values. Another plugin keeping the player object alive then keeps only a shell.
+     */
+    public void release() {
+        if (scoreboard instanceof SafeScoreboard<?> safeScoreboard) safeScoreboard.release();
+        lastPlaceholderReturnedValues.clear();
+        lastPlaceholderEvaluatedValues.clear();
+        lastRelationalValues.clear();
     }
 
     /**

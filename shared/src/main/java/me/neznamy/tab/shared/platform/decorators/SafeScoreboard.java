@@ -42,6 +42,9 @@ public abstract class SafeScoreboard<T extends TabPlayer> implements Scoreboard 
 
     /** Flag tracking time between Login packet send and its processing */
     private boolean frozen;
+
+    /** Whether the player has disconnected and the contents were dropped */
+    private boolean released;
     
     /** Registered objectives */
     private final Map<String, Objective> objectives = new ConcurrentHashMap<>();
@@ -234,6 +237,21 @@ public abstract class SafeScoreboard<T extends TabPlayer> implements Scoreboard 
         }
     }
 
+    /**
+     * Drops everything this scoreboard holds without sending packets, for a player who has disconnected.
+     * The teams and scores are the bulk of a player's memory and nothing can display them anymore, so
+     * they must not survive with the player object if another plugin keeps that object alive.
+     */
+    public synchronized void release() {
+        released = true;
+        frozen = true;
+        objectives.clear();
+        teams.clear();
+        teamsByEntries.clear();
+        blockedTeamAdds.clear();
+        allowedTeamAdds.clear();
+    }
+
     @Override
     @NotNull
     public Map<String, Object> dump() {
@@ -286,6 +304,7 @@ public abstract class SafeScoreboard<T extends TabPlayer> implements Scoreboard 
      *          Format arguments
      */
     private void error(@NonNull String format, @NonNull Object... args) {
+        if (released) return; // A late write after the quit is expected, not an error
         TAB.getInstance().getErrorManager().printError(String.format(format, args) + player.getName(), null);
     }
 

@@ -3,6 +3,7 @@ package me.neznamy.tab.shared.features.injection;
 import me.neznamy.tab.shared.TAB;
 import me.neznamy.tab.shared.features.types.JoinListener;
 import me.neznamy.tab.shared.features.types.Loadable;
+import me.neznamy.tab.shared.features.types.QuitListener;
 import me.neznamy.tab.shared.features.types.TabFeature;
 import me.neznamy.tab.shared.features.types.UnLoadable;
 import me.neznamy.tab.shared.platform.TabPlayer;
@@ -16,7 +17,7 @@ import org.jetbrains.annotations.NotNull;
  * PingSpoof - full feature functionality
  * NickCompatibility - Detect name changes from other plugins
  */
-public abstract class PipelineInjector extends TabFeature implements JoinListener, Loadable, UnLoadable {
+public abstract class PipelineInjector extends TabFeature implements JoinListener, QuitListener, Loadable, UnLoadable {
 
     @NotNull
     @Override
@@ -57,5 +58,11 @@ public abstract class PipelineInjector extends TabFeature implements JoinListene
     @Override
     public void onJoin(@NotNull TabPlayer connectedPlayer) {
         inject(connectedPlayer);
+    }
+
+    @Override
+    public void onQuit(@NotNull TabPlayer disconnectedPlayer) {
+        // The handler holds the player: a closed channel kept alive by another plugin must not keep them too
+        uninject(disconnectedPlayer);
     }
 }
