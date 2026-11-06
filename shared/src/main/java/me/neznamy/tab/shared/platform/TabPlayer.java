@@ -340,7 +340,7 @@ public abstract class TabPlayer implements me.neznamy.tab.api.TabPlayer {
      * cached placeholder values. Another plugin keeping the player object alive then keeps only a shell.
      */
     public void release() {
-        if (scoreboard instanceof SafeScoreboard<?> safeScoreboard) safeScoreboard.release();
+        if (scoreboard instanceof SafeScoreboard) ((SafeScoreboard<?>) scoreboard).release();
         lastPlaceholderReturnedValues.clear();
         lastPlaceholderEvaluatedValues.clear();
         lastRelationalValues.clear();
